@@ -1,0 +1,30 @@
+{
+  "name": "fileserver",
+  "version": "1.0.0",
+  "description": "File server microservice for Raspberry pi",
+  "main": "server/fileserver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anarch1st/FileServer.git"
+  },
+  "author": "Saii",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Anarch1st/FileServer/issues"
+  },
+  "homepage": "https://github.com/Anarch1st/FileServer#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "nodemon": "^1.18.4"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "image-size": "^0.6.3",
+    "jsonfile": "^5.0.0",
+    "multer": "^1.4.1",
+    "request": "^2.88.0"
+  }
+}
