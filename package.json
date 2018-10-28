@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Anarch1st/FileServer.git"
+    "url": "git+https://github.com/Saii626/FileServer.git"
   },
   "author": "Saii",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Anarch1st/FileServer/issues"
+    "url": "https://github.com/Saii626/FileServer/issues"
   },
-  "homepage": "https://github.com/Anarch1st/FileServer#readme",
+  "homepage": "https://github.com/Saii626/FileServer#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
     "nodemon": "^1.18.4"
