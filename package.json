@@ -24,7 +24,6 @@
     "express": "^4.16.4",
     "image-size": "^0.6.3",
     "jsonfile": "^5.0.0",
-    "multer": "^1.4.1",
     "request": "^2.88.0"
   }
 }
