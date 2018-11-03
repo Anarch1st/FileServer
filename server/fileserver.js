@@ -3,7 +3,6 @@ const app = express();
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer');
 const sizeOf = require('image-size');
 const request = require('request');
 const { exec } = require('child_process');
@@ -11,6 +10,7 @@ const { exec } = require('child_process');
 const httpServer = http.createServer(app);
 
 app.use('/',express.static(path.join(__dirname, '../public/files')));
+app.use(express.json());
 app.use('/', function(req, rs, next) {
   console.log(req.originalUrl);
   next();
@@ -22,20 +22,21 @@ if(process.env.NODE_ENV === "production") {
   basePath = '/home/saii';
 }
 
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, basePath+ '/'+req.body.path);
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
+app.post('/upload', function(req, res) {
+  for (var file of req.body.files){
+    var actualPath = basePath;
+    if (req.body.path) {
+      actualPath = actualPath + '/' + req.body.path;
+    }
+    actualPath = actualPath + '/' +file.originalname;
+    fs.rename(file.path, actualPath, (err) => {
+      if (err) {
+        console.error(err);
+      }
+    });
   }
-})
-
-var upload = multer( {storage: storage} );
-
-app.post('/upload', upload.single('file'), function(req, res) {
   res.end();
-})
+});
 
 app.get('/video/*', function(req, res) {
   let filePath = basePath + decodeURI(req.url.substring(6));

@@ -32,7 +32,7 @@ export class FileList extends PolymerElement {
     return html`<div>-----------------------------------------------------------------------------------</div>
       <form action="/files/upload" method="post" enctype="multipart/form-data">
       <input id="uploadPath" type="hidden" name="path">
-      <input type="file" name="file">
+      <input type="file" name="files" multiple>
       <input type="submit">
       </form>`;
   }
