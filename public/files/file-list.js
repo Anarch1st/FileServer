@@ -81,11 +81,11 @@ export class FileList extends PolymerElement {
         margin-bottom: 0;
       }
       #backButton {
-        background: url('../images/back_black.png') no-repeat center center;
+        background: url('../files/images/back_black.png') no-repeat center center;
         margin-right: 40px;
       }
       #forwardButton {
-        background: url('../images/forward_black.png') no-repeat center center;
+        background: url('../files/images/forward_black.png') no-repeat center center;
         margin-left: 40px;
         visibility: hidden;
       }
