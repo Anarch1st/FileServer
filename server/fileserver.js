@@ -126,7 +126,7 @@ app.get('/get/*', function(req, res) {
         for (var file of files) {
 
           if (file.substring(0,1) === '.') {
-            if (!req.user) {
+            if (req.headers.user === 'Anonymous') {
               continue;
             }
           }
