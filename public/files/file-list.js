@@ -1,7 +1,11 @@
-import {PolymerElement, html} from '../files/assets/@polymer/polymer/polymer-element.js';
+import {
+  PolymerElement
+} from '../files/assets/@polymer/polymer/polymer-element.js';
 import '../files/assets/@polymer/iron-ajax/iron-ajax.js';
 import '../files/assets/@polymer/paper-button/paper-button.js';
-// import './res.js';
+import moment from '../files/assets/moment/src/moment.js';
+import * as HTML from './html-utils.js';
+
 
 export class FileList extends PolymerElement {
   constructor() {
@@ -11,100 +15,17 @@ export class FileList extends PolymerElement {
   ready() {
     super.ready();
     this.$.backButton.addEventListener('click', e => {
-    this.selectedFile = null;
-    this.pop('route');
+      this.selectedFile = null;
+      this.pop('route');
     });
 
-    this.$.forwardButton.addEventListener('click', e=> {
+    this.$.forwardButton.addEventListener('click', e => {
       console.log("forward");
-    })
-  }
-
-  static get headerTemplate() {
-    return html`<h1 id="headingText"></h1>
-    <div id="buttons">
-    <paper-button id="backButton"></paper-button>
-    <paper-button id="forwardButton"></paper-button>
-    </div>`;
-  }
-
-  static get footerTemplate() {
-    return html`<div>-----------------------------------------------------------------------------------</div>
-      <form action="/files/upload" method="post" enctype="multipart/form-data">
-      <input id="uploadPath" type="hidden" name="path">
-      <input type="file" name="files" multiple>
-      <input type="submit">
-      </form>`;
+    });
   }
 
   static get template() {
-    return html`
-    <style>
-      .file {
-        color: blue;
-      }
-      .dir {
-        color: red;
-      }
-      #footerTemplate {
-        flex: none;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      #headerTemplate {
-        flex: none;
-        width: 100%;
-      }
-      #outerDiv {
-        flex: 1;
-        width: 99%;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        text-align: center;
-        overflow: auto;
-        border: 1px solid grey;
-        border-radius: 5px;
-      }
-      .list:nth-child(odd) {
-        background: #EEEEEE;
-      }
-      .list:nth-child(even) {
-        background: white;
-      }
-      #buttons {
-        text-align: center;
-      }
-      h1 {
-        text-align: center;
-        margin-bottom: 0;
-      }
-      #backButton {
-        background: url('../files/images/back_black.png') no-repeat center center;
-        margin-right: 40px;
-      }
-      #forwardButton {
-        background: url('../files/images/forward_black.png') no-repeat center center;
-        margin-left: 40px;
-        visibility: hidden;
-      }
-      embed {
-        background-color: #EEEEEE;
-      }
-    </style>
-    <div id='headerTemplate'>${this.headerTemplate}</div>
-    <div id='outerDiv'></div>
-    <div id='footerTemplate'>${this.footerTemplate}</div>
-
-    <iron-ajax id="fileList"
-        on-response="handleFilesList"
-        on-error="handleError">
-        </iron-ajax>
-    <iron-ajax id="file"
-        on-response="handleFile"
-        on-error="handleError">
-        </iron-ajax>`;
+    return HTML.getTemplate();
   }
 
   static get properties() {
@@ -119,7 +40,9 @@ export class FileList extends PolymerElement {
       },
       selectedFile: {
         type: Object,
-        value: {'isFile': false},
+        value: {
+          'isFile': false
+        },
         observer: '_fileSelected'
       },
       route: {
@@ -146,7 +69,7 @@ export class FileList extends PolymerElement {
   }
 
   _routeChanged() {
-    this.$.headingText.innerText = this.route[this.route.length-1] || '/';
+    this.$.headingText.innerText = this.route[this.route.length - 1] || '/';
     var xhr = null;
     if (this.selectedFile && this.selectedFile.isFile) {
       xhr = this.$.file;
@@ -157,30 +80,35 @@ export class FileList extends PolymerElement {
     const url = this._resources.getUrlFromRoute(this.route);
     this.$.uploadPath.value = url;
     xhr.url = this._resources.urls.GET_BASE_FILE_URL + url;
+
+    HTML.showSpinner(this.$.outerDiv);
     xhr.generateRequest();
   }
 
   _fileListUpdated() {
-    var outerDiv = this.$.outerDiv;
-
-    outerDiv.innerHTML = "";
-
-    for (var val of this.fileList) {
-      outerDiv.append(this._getHTMLElement(val));
+    const sizeFunc = (size) => {
+      var ret = size;
+      if (ret > 1000000000) {
+        ret = (ret / 1073741824).toFixed(2) + ' gb';
+      } else if (ret > 1000000) {
+        ret = (ret / 1048576).toFixed(2) + ' mb';
+      } else if (ret > 1000) {
+        ret = (ret / 1024).toFixed(2) + ' kb';
+      } else {
+        ret = ret + ' b';
+      }
+      return ret;
     }
+
+    const timeFunc = (time) => {
+      return moment(time).format('Do MMM YY');
+    }
+
+    HTML.showFileList(this.$.outerDiv, this.fileList, function(obj) {
+      this.set('selectedFile', obj)
+    }.bind(this), sizeFunc, timeFunc);
   }
 
-  _getHTMLElement(obj) {
-    var div = document.createElement("div");
-    var t = document.createTextNode(obj.name);
-    div.classList.add(obj.isFile?'file':'dir');
-    div.classList.add('list')
-    div.append(t);
-    div.addEventListener('click', function(e){
-      this.set('selectedFile', obj);
-    }.bind(this));
-    return div;
-  }
 
   handleFilesList(data) {
     this.set('fileList', this._resources.parseResponse(data.detail.response));
@@ -195,33 +123,14 @@ export class FileList extends PolymerElement {
     console.log(info.mime);
     var outerDiv = this.$.outerDiv;
 
-    outerDiv.innerHTML = "";
-
-    if (info === null || info.mime === null || info.mime === false) {
+    if (data === null || data.mime === null || data.mime === false) {
       console.log('invalid');
       return;
     }
 
     const url = this._resources.urls.GET_FILE + this._resources.getUrlFromRoute(this.route);
 
-    if (this.videoTags.includes(info.mime)) {
-      var src = document.createElement('source');
-      src.setAttribute('src', url);
-      src.setAttribute('type', info.mime);
-
-      var player = document.createElement('video');
-      player.setAttribute('controls', 'controls');
-      player.append(src);
-
-      outerDiv.append(player);
-    } else {
-      var embed = document.createElement('embed');
-      embed.setAttribute('src', url);
-      embed.setAttribute('width', info.width || this.$.headerTemplate.clientWidth-50);
-      embed.setAttribute('height', info.height || window.innerHeight -
-          this.$.headerTemplate.clientHeight - this.$.footerTemplate.clientHeight);
-      outerDiv.append(embed);
-    }
+    HTML.showFile(this.$.outerDiv, info, url, this.videoTags.includes(info.mime));
   }
 }
 customElements.define('file-list', FileList)
