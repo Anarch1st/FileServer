@@ -17,13 +17,24 @@
   },
   "homepage": "https://github.com/Saii626/FileServer#readme",
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "nodemon": "^1.18.4"
+    "nodemon": "^1.18.9"
   },
   "dependencies": {
     "express": "^4.16.4",
     "image-size": "^0.6.3",
     "jsonfile": "^5.0.0",
     "request": "^2.88.0"
+  },
+  "nodemonConfig": {
+    "verbose": true,
+    "ignore": [
+      "public/*",
+      "node_modules/*"
+    ],
+    "events": {
+      "start": "notify-send FileServer \"Server started\"",
+      "crash": "notify-send FileServer \"Server crashed\"",
+      "exit": "notify-send FileServer \"Server stopped\""
+    }
   }
 }
