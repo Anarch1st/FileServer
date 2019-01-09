@@ -1,9 +1,9 @@
 import {
   PolymerElement
-} from '../files/assets/@polymer/polymer/polymer-element.js';
-import '../files/assets/@polymer/iron-ajax/iron-ajax.js';
-import '../files/assets/@polymer/paper-button/paper-button.js';
-import moment from '../files/assets/moment/src/moment.js';
+} from '@polymer/polymer/polymer-element.js';
+import '@polymer/iron-ajax/iron-ajax.js';
+import '@polymer/paper-button/paper-button.js';
+import moment from 'moment';
 import * as HTML from './html-utils.js';
 
 

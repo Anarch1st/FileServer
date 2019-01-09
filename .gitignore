@@ -61,4 +61,4 @@ typings/
 .next
 
 private/
-public/files/assets
+public/build
