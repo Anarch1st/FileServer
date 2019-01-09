@@ -1,0 +1,24 @@
+{
+  "entrypoint": "explore.html",
+  "shell": "file-list.js",
+  "sources": [
+    "css/*",
+    "images/*",
+    "urls.js"
+  ],
+  "npm": true,
+  "builds": [{
+    "name": "default",
+    "bundle": true,
+    "js": {
+      "minify": true,
+      "compile": "es2015"
+    },
+    "css": {
+      "minify": true
+    },
+    "html": {
+      "minify": true
+    }
+  }]
+}

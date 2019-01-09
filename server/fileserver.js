@@ -11,7 +11,7 @@ const {
 
 const httpServer = http.createServer(app);
 
-app.use('/', express.static(path.join(__dirname, '../public/files')));
+app.use('/', express.static(path.join(__dirname, '../public/build/default')));
 app.use(express.json());
 app.use('/', function(req, rs, next) {
   console.log(req.originalUrl);
@@ -100,9 +100,11 @@ app.get('/getFile/*', function(req, res) {
 
 app.get('/get/*', function(req, res) {
   let filePath = basePath + decodeURI(req.url.substring(4));
-  const pathStat = fs.statSync(filePath);
+  const pathStat = fs.lstatSync(filePath);
 
-  if (pathStat.isFile()) {
+  if (pathStat.isSymbolicLink()) {
+    res.send('Symbolic Link');
+  } else if (pathStat.isFile()) {
     fs.access(filePath, fs.constants.R_OK, (err) => {
       if (err) {
         res.send('Insufficient Read permission');
@@ -139,7 +141,10 @@ app.get('/get/*', function(req, res) {
               continue;
             }
           }
-          const stat = fs.statSync(filePath + '/' + file);
+          const stat = fs.lstatSync(filePath + '/' + file);
+          if (stat.isSymbolicLink()) {
+            continue;
+          }
           obj.push({
             'name': file,
             'isFile': stat.isFile(),
@@ -172,7 +177,7 @@ app.get('/create/*', function(req, res) {
 });
 
 app.get('/explore', function(req, res) {
-  res.sendFile(path.join(__dirname, '../public/files/explore.html'));
+  res.sendFile(path.join(__dirname, '../public/build/default/explore.html'));
 });
 
 function registerSelf() {

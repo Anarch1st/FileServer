@@ -1,7 +1,7 @@
 import {
   html
-} from '../files/assets/@polymer/polymer/polymer-element.js';
-import '../files/assets/@polymer/paper-spinner/paper-spinner.js'
+} from '@polymer/polymer/polymer-element.js';
+import '@polymer/paper-spinner/paper-spinner.js'
 
 function getTemplate() {
   return html `
