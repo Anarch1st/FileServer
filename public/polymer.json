@@ -20,5 +20,18 @@
     "html": {
       "minify": true
     }
+  }, {
+    "name": "dev",
+    "bundle": false,
+    "js": {
+      "minify": false,
+      "compile": "es2015"
+    },
+    "css": {
+      "minify": false
+    },
+    "html": {
+      "minify": false
+    }
   }]
 }

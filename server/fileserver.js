@@ -11,18 +11,16 @@ const {
 
 const httpServer = http.createServer(app);
 
-app.use('/', express.static(path.join(__dirname, '../public/build/default')));
-app.use(express.json());
-app.use('/', function(req, rs, next) {
-  console.log(req.originalUrl);
-  next();
-})
-var basePath;
-if (process.env.NODE_ENV === "production") {
+let basePath;
+if (process.env.NODE_ENV === 'production') {
+  app.use('/', express.static(path.join(__dirname, '../public/build/default')));
   basePath = '/media/pi';
 } else {
+  app.use('/', express.static(path.join(__dirname, '../public/build/dev')));
   basePath = '/home/saii';
 }
+
+app.use(express.json());
 
 app.post('/upload', function(req, res) {
   for (var file of req.body.files) {
@@ -177,7 +175,11 @@ app.get('/create/*', function(req, res) {
 });
 
 app.get('/explore', function(req, res) {
-  res.sendFile(path.join(__dirname, '../public/build/default/explore.html'));
+  if (process.env.NODE_ENV === 'production') {
+    res.sendFile(path.join(__dirname, '../public/build/default/explore.html'));
+  } else {
+    res.sendFile(path.join(__dirname, '../public/build/dev/explore.html'));
+  }
 });
 
 function registerSelf() {
@@ -199,6 +201,6 @@ function registerSelf() {
 }
 
 httpServer.listen(process.env.PORT || 8030, function() {
-  registerSelf();
+  if (process.env.NODE_ENV === 'production') registerSelf();
   console.log("Server started on port: " + httpServer.address().port);
 });
