@@ -12,19 +12,19 @@ let URLs = (function() {
         url += path + '/'
       }
 
-      return url.substring(0, url.length-1);
+      return url.substring(0, url.length - 1);
     } else {
       return "";
     }
   }
   return {
     urls: {
-      GET_BASE_FILE_URL: '/files/get/',
-      GET_FILE_UPLOAD_URL: '/files/upload',
+      GET_BASE_FILE_URL: './get/',
+      GET_FILE_UPLOAD_URL: './upload',
 
       // GET_VIDEO_FILE: '/files/video',
-      GET_FILE: '/files/getFile/',
-      NEW_FOLDER: '/files/create/'
+      GET_FILE: './getFile/',
+      NEW_FOLDER: './create/'
     },
     parseResponse: parseResponse,
     getUrlFromRoute: getUrlFromRoute
