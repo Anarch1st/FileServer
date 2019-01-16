@@ -62,11 +62,11 @@ function getTemplate() {
       margin-bottom: 0;
     }
     #backButton {
-      background: url('../images/back_black.png') no-repeat center center;
+      background: url('./images/back_black.png') no-repeat center center;
       margin-right: 40px;
     }
     #forwardButton {
-      background: url('../images/forward_black.png') no-repeat center center;
+      background: url('./images/forward_black.png') no-repeat center center;
       margin-left: 40px;
       visibility: hidden;
     }
