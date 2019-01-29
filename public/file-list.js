@@ -32,7 +32,7 @@ export class FileList extends PolymerElement {
     return {
       _resources: {
         type: Object,
-        value: URLs
+        value: Resources
       },
       fileList: {
         type: Array,
@@ -104,8 +104,17 @@ export class FileList extends PolymerElement {
       return moment(time).format('Do MMM YY');
     }
 
-    HTML.showFileList(this.$.outerDiv, this.fileList, function(obj) {
-      this.set('selectedFile', obj)
+    HTML.showFileList(this.$.outerDiv, this.fileList, function(obj, action) {
+      if (action === this._resources.constants.CLICK.key) {
+        this.set('selectedFile', obj)
+      }
+      // else if (action === this._resources.constants.DOWNLOAD) {
+      console.log(`${obj.name} ${action}`);
+      // } else if (action === this._resources.constants.CREATE_FOLDER) {
+      //   console.log(`${obj.name} ${action}`);
+      // } else if (action === this._resources.constants.DELETE) {
+      //   console.log(`${obj.name} ${action}`);
+      // }
     }.bind(this), sizeFunc, timeFunc);
   }
 

@@ -4,7 +4,7 @@
   "sources": [
     "css/*",
     "images/*",
-    "urls.js"
+    "resources.js"
   ],
   "npm": true,
   "builds": [{

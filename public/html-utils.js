@@ -21,13 +21,6 @@ function getTemplate() {
       border: 1px solid grey;
       border-radius: 5px;
     }
-    @keyframes rowanim {
-      0% {background: #ffff00}
-      25% {background: #00ff99}
-      50% {background: #6699ff}
-      75% {background: #ff6699}
-      100% {background: #ffff00}
-    }
     .list {
       width: 100%;
       table-layout: fixed;
@@ -39,7 +32,6 @@ function getTemplate() {
       background: white;
     }
     .list tr:hover {
-      animation: rowanim 12s linear 0s infinite normal;
       color: black;
     }
     .list th {
@@ -82,6 +74,30 @@ function getTemplate() {
       align-items: center;
       width: 100%;
     }
+    .menu {
+      width: 150px;
+      box-shadow: 3px 3px 5px #888888;
+      border-style: solid;
+      border-width: 1px;
+      border-color: grey;
+      border-radius: 2px;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 3px;
+      padding-bottom: 3px;
+      position: fixed;
+      background: white;
+      z-index: 100;
+      display: none;
+    }
+    .menu-item {
+      height: 20px;
+      color: black;
+    }
+    .menu-item:hover {
+      background-color: #6CB5FF;
+      cursor: pointer;
+    }
     embed {
       background-color: #EEEEEE;
     }
@@ -106,7 +122,7 @@ function getTemplate() {
   <div id="seperator"></div>
 
   <div id='outerDiv'></div>
-</div>
+
 
 
   <iron-ajax id="fileList"
@@ -167,8 +183,10 @@ function _getHTMLElement(obj, callback, sizeFormatter, timeFormatter) {
   row.classList.add(obj.isFile ? 'file' : 'dir');
 
   row.addEventListener('click', e => {
-    callback(obj);
+    callback(obj, Resources.constants.CLICK.key);
   });
+
+  addContextMenu(row, obj, callback);
   return row;
 }
 
@@ -218,6 +236,81 @@ function showSpinner(element) {
   element.append(spinner);
 }
 
+let menuDisplayed = false;
+let displayedContextMenu = null;
+
+function addContextMenu(elem, obj, callback) {
+  let contextMenu = _createContextMenuFor(obj, callback);
+  elem.append(contextMenu);
+
+  elem.addEventListener("contextmenu", function() {
+    arguments[0].preventDefault();
+
+    if (menuDisplayed) {
+      displayedContextMenu.style.display = 'none';
+      menuDisplayed = false;
+    }
+
+    let left = arguments[0].clientX;
+    let top = arguments[0].clientY;
+
+    contextMenu.style.left = left + "px";
+    contextMenu.style.top = top + "px";
+    contextMenu.style.display = "block";
+
+    menuDisplayed = true;
+    displayedContextMenu = contextMenu;
+  }, false);
+
+  document.addEventListener("click", function() {
+    if (menuDisplayed == true) {
+      contextMenu.style.display = "none";
+    }
+  }, true);
+}
+
+function _createContextMenuFor(obj, callback) {
+  let menu = document.createElement('div');
+  menu.classList.add('menu');
+
+  if (obj.isFile) {
+    let download = _createElementWithText('div', Resources.constants.DOWNLOAD.key);
+    download.classList.add('menu-item');
+    download.addEventListener('click', e => {
+      e.stopPropagation();
+      callback(obj, Resources.constants.DOWNLOAD.val)
+    });
+    menu.append(download);
+  } else {
+    let download = _createElementWithText('div', Resources.constants.DOWNLOAD_FOLDER.key);
+    download.classList.add('menu-item');
+    download.addEventListener('click', e => {
+      e.stopPropagation();
+      callback(obj, Resources.constants.DOWNLOAD_FOLDER.val)
+    });
+    menu.append(download);
+  }
+
+  let folder = _createElementWithText('div', Resources.constants.NEW_FOLDER.key);
+  folder.classList.add('menu-item');
+  folder.addEventListener('click', e => {
+    e.stopPropagation();
+    callback(obj, Resources.constants.NEW_FOLDER.val)
+  });
+  menu.append(folder);
+
+  if (obj.isFile) {
+    let del = _createElementWithText('div', Resources.constants.DELETE.key);
+    del.classList.add('menu-item');
+    del.addEventListener('click', e => {
+      e.stopPropagation();
+      callback(obj, Resources.constants.DELETE.val)
+    });
+    menu.append(del);
+  }
+
+  return menu;
+}
 export {
   getTemplate,
   showFileList,
