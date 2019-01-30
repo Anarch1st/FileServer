@@ -26,7 +26,7 @@ app.post('/upload', function(req, res) {
   for (var file of req.body.files) {
     var actualPath = basePath;
     if (req.body.path) {
-      actualPath = actualPath + '/' + req.body.path;
+      actualPath = actualPath + req.body.path;
     }
     actualPath = actualPath + '/' + file.originalname;
     fs.rename(file.path, actualPath, (err) => {
@@ -135,7 +135,7 @@ app.get('/get/*', function(req, res) {
         for (var file of files) {
 
           if (file.substring(0, 1) === '.') {
-            if (req.headers.isSecure === 'false') {
+            if (req.headers.issecure === 'false') {
               continue;
             }
           }

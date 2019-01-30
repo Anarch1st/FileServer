@@ -32,7 +32,8 @@ function getTemplate() {
       background: white;
     }
     .list tr:hover {
-      color: black;
+      color: #FCF8DE;
+      background-color: #00303C;
     }
     .list th {
       color: white;
@@ -45,9 +46,10 @@ function getTemplate() {
       text-align: center;
       width: 80%;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-around;
       min-height: 40px;
+      margin-top: 10px;
     }
     h1 {
       text-align: center;
@@ -103,8 +105,6 @@ function getTemplate() {
     }
   </style>
 
-  <h1 id="headingText"></h1>
-
   <div id="body">
   <div id="header">
     <form id="uploadForm" action="/files/upload" method="post" enctype="multipart/form-data">
@@ -112,18 +112,11 @@ function getTemplate() {
       <input type="file" name="files" multiple>
       <input type="submit" value="Upload">
     </form>
-    <div id="buttons">
-      <paper-button id="backButton"></paper-button>
-      <paper-button id="forwardButton"></paper-button>
-    </div>
-    <div></div>
   </div>
 
   <div id="seperator"></div>
 
   <div id='outerDiv'></div>
-
-
 
   <iron-ajax id="fileList"
       on-response="handleFilesList"
