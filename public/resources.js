@@ -30,10 +30,22 @@ let Resources = (function() {
     return path;
   }
 
+  function getRouteFromPath(path) {
+    let r = path.split('/');
+    let route = []
+
+    if (r[1] && r[1].length >= 0) {
+      route = r.slice(1, r.length);
+    }
+
+    return route;
+  }
+
   return {
     urls: {
       GET_BASE_FILE_URL: './get',
       GET_FILE_UPLOAD_URL: './upload',
+      GET_FILE_DOWNLOAD_URL: './download',
 
       // GET_VIDEO_FILE: '/files/video',
       GET_FILE: './getFile',
@@ -41,26 +53,27 @@ let Resources = (function() {
     },
     parseResponse: parseResponse,
     getPathFromRoute: getPathFromRoute,
+    getRouteFromPath: getRouteFromPath,
     constants: {
       CLICK: {
-        key: 'Click',
-        val: 'click'
+        text: 'Click',
+        key: 'click'
       },
       DOWNLOAD: {
-        key: 'Download',
-        val: 'download'
+        text: 'Download',
+        key: 'download'
       },
       DOWNLOAD_FOLDER: {
-        key: 'Download as Zip',
-        val: 'download_as_zip'
+        text: 'Download as Zip',
+        key: 'download_as_zip'
       },
       NEW_FOLDER: {
-        key: 'Create Folder',
-        val: 'create_folder'
+        text: 'Create Folder',
+        key: 'create_folder'
       },
       DELETE: {
-        key: 'Delete',
-        val: 'delete'
+        text: 'Delete',
+        key: 'delete'
       }
     }
   }

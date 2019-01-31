@@ -2,6 +2,7 @@ import {
   html
 } from '@polymer/polymer/polymer-element.js';
 import '@polymer/paper-spinner/paper-spinner.js'
+import '@polymer/app-route/app-location.js'
 
 function getTemplate() {
   return html `
@@ -106,6 +107,8 @@ function getTemplate() {
   </style>
 
   <div id="body">
+  <app-location route="{{route}}" use-hash-as-path></app-location>
+
   <div id="header">
     <form id="uploadForm" action="/files/upload" method="post" enctype="multipart/form-data">
       <input id="uploadPath" type="hidden" name="path">
@@ -118,14 +121,13 @@ function getTemplate() {
 
   <div id='outerDiv'></div>
 
-  <iron-ajax id="fileList"
-      on-response="handleFilesList"
-      on-error="handleError">
-      </iron-ajax>
   <iron-ajax id="file"
       on-response="handleFile"
       on-error="handleError">
-      </iron-ajax>`;
+      </iron-ajax>
+
+  <a id="fileDownload">
+      `;
 }
 
 function showFileList(element, fileList, callback, sizeFormatter, timeFormatter) {
@@ -257,7 +259,7 @@ function addContextMenu(elem, obj, callback) {
 
   document.addEventListener("click", function() {
     if (menuDisplayed == true) {
-      contextMenu.style.display = "none";
+      displayedContextMenu.style.display = "none";
     }
   }, true);
 }
@@ -267,24 +269,24 @@ function _createContextMenuFor(obj, callback) {
   menu.classList.add('menu');
 
   if (obj.isFile) {
-    let download = _createElementWithText('div', Resources.constants.DOWNLOAD.key);
+    let download = _createElementWithText('div', Resources.constants.DOWNLOAD.text);
     download.classList.add('menu-item');
     download.addEventListener('click', e => {
       e.stopPropagation();
-      callback(obj, Resources.constants.DOWNLOAD.val)
+      callback(obj, Resources.constants.DOWNLOAD.key)
     });
     menu.append(download);
   } else {
-    let download = _createElementWithText('div', Resources.constants.DOWNLOAD_FOLDER.key);
+    let download = _createElementWithText('div', Resources.constants.DOWNLOAD_FOLDER.text);
     download.classList.add('menu-item');
     download.addEventListener('click', e => {
       e.stopPropagation();
-      callback(obj, Resources.constants.DOWNLOAD_FOLDER.val)
+      callback(obj, Resources.constants.DOWNLOAD_FOLDER.key)
     });
     menu.append(download);
   }
 
-  let folder = _createElementWithText('div', Resources.constants.NEW_FOLDER.key);
+  let folder = _createElementWithText('div', Resources.constants.NEW_FOLDER.text);
   folder.classList.add('menu-item');
   folder.addEventListener('click', e => {
     e.stopPropagation();
@@ -293,7 +295,7 @@ function _createContextMenuFor(obj, callback) {
   menu.append(folder);
 
   if (obj.isFile) {
-    let del = _createElementWithText('div', Resources.constants.DELETE.key);
+    let del = _createElementWithText('div', Resources.constants.DELETE.text);
     del.classList.add('menu-item');
     del.addEventListener('click', e => {
       e.stopPropagation();

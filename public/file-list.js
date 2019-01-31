@@ -10,29 +10,6 @@ import * as HTML from './html-utils.js';
 export class FileList extends PolymerElement {
   constructor() {
     super();
-    this.boundHashLocationListener = this._hashLocationChanged.bind(this);
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    window.addEventListener('hashchange', this.boundHashLocationListener);
-
-    if (location.hash && location.hash.length >= 0) {
-      let hashUrl = location.hash.substring(1, location.hash.length);
-      let rout = hashUrl.split('/');
-
-      if (rout[1] && rout[1].length >= 0) {
-        this.set('route', rout.slice(1, rout.length));
-      }
-      this._hashLocationChanged();
-    } else {
-      location.hash = '/';
-    }
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    window.removeEventListener('hashchange', this.boundHashLocationListener);
   }
 
   static get template() {
@@ -51,13 +28,11 @@ export class FileList extends PolymerElement {
       },
       selectedFile: {
         type: Object,
-        value: {
-          'isFile': false
-        },
         observer: '_fileSelected'
       },
       route: {
-        type: Array
+        type: Object,
+        observer: '_routeChanged'
       },
       videoTags: {
         type: Array,
@@ -66,41 +41,29 @@ export class FileList extends PolymerElement {
     }
   }
 
-  static get observers() {
-    return [
-      '_routeChanged(route.splices)'
-    ]
-  }
-
   _fileSelected() {
     if (this.selectedFile && this.selectedFile.name) {
-      if (this.route) {
-        this.push('route', this.selectedFile.name);
-      } else {
-        this.set('route', [this.selectedFile.name]);
-      }
+      let newURL = (this.route.path.length > 1) ? `#${this.route.path}/${this.selectedFile.name}` : `#/${this.selectedFile.name}`
+      history.pushState({}, this.selectedFile.name, newURL);
+      window.dispatchEvent(new CustomEvent('location-changed'));
     }
   }
 
   _routeChanged() {
-    location.hash = this._resources.getPathFromRoute(this.route);
-  }
+    if (this.route.path.length > 0) {
+      let xhr = this.$.file;
 
-  _hashLocationChanged() {
-    let xhr = null;
-    if (this.selectedFile && this.selectedFile.isFile) {
-      xhr = this.$.file;
+      let url = this.route.path;
+      console.log(url);
+      this.$.uploadPath.value = url;
+      xhr.url = this._resources.urls.GET_BASE_FILE_URL + url;
+
+      HTML.showSpinner(this.$.outerDiv);
+      xhr.generateRequest();
     } else {
-      xhr = this.$.fileList;
+      history.pushState({}, '/', '#/');
+      window.dispatchEvent(new CustomEvent('location-changed'));
     }
-
-    let url = location.hash.substring(1, location.hash.length);
-    console.log(url);
-    this.$.uploadPath.value = url;
-    xhr.url = this._resources.urls.GET_BASE_FILE_URL + url;
-
-    HTML.showSpinner(this.$.outerDiv);
-    xhr.generateRequest();
   }
 
   _fileListUpdated() {
@@ -125,20 +88,15 @@ export class FileList extends PolymerElement {
     HTML.showFileList(this.$.outerDiv, this.fileList, function(obj, action) {
       if (action === this._resources.constants.CLICK.key) {
         this.set('selectedFile', obj)
+      } else if (action === this._resources.constants.DOWNLOAD.key) {
+        let downloader = this.$.fileDownload;
+        downloader.href = this._resources.urls.GET_FILE_DOWNLOAD_URL + this.route.path + '/' + encodeURI(obj.name);
+        downloader.download = obj.name;
+        downloader.click();
+      } else {
+        console.log(`${obj.name} ${action}`);
       }
-      // else if (action === this._resources.constants.DOWNLOAD) {
-      console.log(`${obj.name} ${action}`);
-      // } else if (action === this._resources.constants.CREATE_FOLDER) {
-      //   console.log(`${obj.name} ${action}`);
-      // } else if (action === this._resources.constants.DELETE) {
-      //   console.log(`${obj.name} ${action}`);
-      // }
     }.bind(this), sizeFunc, timeFunc);
-  }
-
-
-  handleFilesList(data) {
-    this.set('fileList', this._resources.parseResponse(data.detail.response));
   }
 
   handleError(err) {
@@ -146,18 +104,29 @@ export class FileList extends PolymerElement {
   }
 
   handleFile(data) {
-    const info = data.detail.response;
-    console.log(info.mime);
-    var outerDiv = this.$.outerDiv;
-
-    if (data === null || data.mime === null || data.mime === false) {
-      console.log('invalid');
+    let response = data.detail.response;
+    if (!response) {
+      console.log('No response');
       return;
     }
 
-    const url = this._resources.urls.GET_FILE + this._resources.getPathFromRoute(this.route);
+    switch (response.type) {
+      case 'file':
+        const info = response.data;
+        const url = this._resources.urls.GET_FILE + this.route.path;
+        HTML.showFile(this.$.outerDiv, info, url, this.videoTags.includes(info.mime));
+        break;
 
-    HTML.showFile(this.$.outerDiv, info, url, this.videoTags.includes(info.mime));
+      case 'folder':
+        this.set('fileList', this._resources.parseResponse(response.data));
+        break;
+
+      case 'link':
+        console.log('Link not yet supported');
+        break;
+      default:
+        console.log(`Unsupported ${response.type}`);
+    }
   }
 }
 customElements.define('file-list', FileList)
