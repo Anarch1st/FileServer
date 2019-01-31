@@ -5,6 +5,7 @@
   "license": "ISC",
   "moduleResolution": "node",
   "dependencies": {
+    "@polymer/app-route": "^3.0.2",
     "@polymer/iron-ajax": "^3.0.1",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-spinner": "^3.0.1",

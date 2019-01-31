@@ -26,7 +26,7 @@ app.post('/upload', function(req, res) {
   for (var file of req.body.files) {
     var actualPath = basePath;
     if (req.body.path) {
-      actualPath = actualPath + '/' + req.body.path;
+      actualPath = actualPath + req.body.path;
     }
     actualPath = actualPath + '/' + file.originalname;
     fs.rename(file.path, actualPath, (err) => {
@@ -101,7 +101,10 @@ app.get('/get/*', function(req, res) {
   const pathStat = fs.lstatSync(filePath);
 
   if (pathStat.isSymbolicLink()) {
-    res.send('Symbolic Link');
+    res.send({
+      type: 'link',
+      data: pathStat
+    });
   } else if (pathStat.isFile()) {
     fs.access(filePath, fs.constants.R_OK, (err) => {
       if (err) {
@@ -119,7 +122,10 @@ app.get('/get/*', function(req, res) {
             sendObj.width = dim.width;
             sendObj.height = dim.height;
           }
-          res.send(sendObj);
+          res.send({
+            type: 'file',
+            data: sendObj
+          });
         });
         return;
       }
@@ -135,14 +141,11 @@ app.get('/get/*', function(req, res) {
         for (var file of files) {
 
           if (file.substring(0, 1) === '.') {
-            if (req.headers.isSecure === 'false') {
-              continue;
-            }
-          }
-          const stat = fs.lstatSync(filePath + '/' + file);
-          if (stat.isSymbolicLink()) {
             continue;
           }
+          const stat = fs.lstatSync(filePath + '/' + file);
+
+          // console.log(stat);
           obj.push({
             'name': file,
             'isFile': stat.isFile(),
@@ -156,7 +159,10 @@ app.get('/get/*', function(req, res) {
             'userId': stat.uid
           });
         };
-        res.send(obj);
+        res.send({
+          type: 'folder',
+          data: obj
+        });
       }
     });
   }
@@ -173,6 +179,11 @@ app.get('/create/*', function(req, res) {
     }
   })
 });
+
+app.get('/download/*', (req, res) => {
+  let filePath = basePath + decodeURI(req.url.substring(9));
+  res.download(filePath);
+})
 
 app.get('/explore', function(req, res) {
   if (process.env.NODE_ENV === 'production') {

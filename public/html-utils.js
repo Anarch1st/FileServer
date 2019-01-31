@@ -2,6 +2,7 @@ import {
   html
 } from '@polymer/polymer/polymer-element.js';
 import '@polymer/paper-spinner/paper-spinner.js'
+import '@polymer/app-route/app-location.js'
 
 function getTemplate() {
   return html `
@@ -21,13 +22,6 @@ function getTemplate() {
       border: 1px solid grey;
       border-radius: 5px;
     }
-    @keyframes rowanim {
-      0% {background: #ffff00}
-      25% {background: #00ff99}
-      50% {background: #6699ff}
-      75% {background: #ff6699}
-      100% {background: #ffff00}
-    }
     .list {
       width: 100%;
       table-layout: fixed;
@@ -39,8 +33,8 @@ function getTemplate() {
       background: white;
     }
     .list tr:hover {
-      animation: rowanim 12s linear 0s infinite normal;
-      color: black;
+      color: #FCF8DE;
+      background-color: #00303C;
     }
     .list th {
       color: white;
@@ -53,9 +47,10 @@ function getTemplate() {
       text-align: center;
       width: 80%;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-around;
       min-height: 40px;
+      margin-top: 10px;
     }
     h1 {
       text-align: center;
@@ -82,41 +77,57 @@ function getTemplate() {
       align-items: center;
       width: 100%;
     }
+    .menu {
+      width: 150px;
+      box-shadow: 3px 3px 5px #888888;
+      border-style: solid;
+      border-width: 1px;
+      border-color: grey;
+      border-radius: 2px;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 3px;
+      padding-bottom: 3px;
+      position: fixed;
+      background: white;
+      z-index: 100;
+      display: none;
+    }
+    .menu-item {
+      height: 20px;
+      color: black;
+    }
+    .menu-item:hover {
+      background-color: #6CB5FF;
+      cursor: pointer;
+    }
     embed {
       background-color: #EEEEEE;
     }
   </style>
 
-  <h1 id="headingText"></h1>
-
   <div id="body">
+  <app-location route="{{route}}" use-hash-as-path></app-location>
+
   <div id="header">
     <form id="uploadForm" action="/files/upload" method="post" enctype="multipart/form-data">
       <input id="uploadPath" type="hidden" name="path">
       <input type="file" name="files" multiple>
       <input type="submit" value="Upload">
     </form>
-    <div id="buttons">
-      <paper-button id="backButton"></paper-button>
-      <paper-button id="forwardButton"></paper-button>
-    </div>
-    <div></div>
   </div>
 
   <div id="seperator"></div>
 
   <div id='outerDiv'></div>
-</div>
 
-
-  <iron-ajax id="fileList"
-      on-response="handleFilesList"
-      on-error="handleError">
-      </iron-ajax>
   <iron-ajax id="file"
       on-response="handleFile"
       on-error="handleError">
-      </iron-ajax>`;
+      </iron-ajax>
+
+  <a id="fileDownload">
+      `;
 }
 
 function showFileList(element, fileList, callback, sizeFormatter, timeFormatter) {
@@ -167,8 +178,10 @@ function _getHTMLElement(obj, callback, sizeFormatter, timeFormatter) {
   row.classList.add(obj.isFile ? 'file' : 'dir');
 
   row.addEventListener('click', e => {
-    callback(obj);
+    callback(obj, Resources.constants.CLICK.key);
   });
+
+  addContextMenu(row, obj, callback);
   return row;
 }
 
@@ -218,6 +231,81 @@ function showSpinner(element) {
   element.append(spinner);
 }
 
+let menuDisplayed = false;
+let displayedContextMenu = null;
+
+function addContextMenu(elem, obj, callback) {
+  let contextMenu = _createContextMenuFor(obj, callback);
+  elem.append(contextMenu);
+
+  elem.addEventListener("contextmenu", function() {
+    arguments[0].preventDefault();
+
+    if (menuDisplayed) {
+      displayedContextMenu.style.display = 'none';
+      menuDisplayed = false;
+    }
+
+    let left = arguments[0].clientX;
+    let top = arguments[0].clientY;
+
+    contextMenu.style.left = left + "px";
+    contextMenu.style.top = top + "px";
+    contextMenu.style.display = "block";
+
+    menuDisplayed = true;
+    displayedContextMenu = contextMenu;
+  }, false);
+
+  document.addEventListener("click", function() {
+    if (menuDisplayed == true) {
+      displayedContextMenu.style.display = "none";
+    }
+  }, true);
+}
+
+function _createContextMenuFor(obj, callback) {
+  let menu = document.createElement('div');
+  menu.classList.add('menu');
+
+  if (obj.isFile) {
+    let download = _createElementWithText('div', Resources.constants.DOWNLOAD.text);
+    download.classList.add('menu-item');
+    download.addEventListener('click', e => {
+      e.stopPropagation();
+      callback(obj, Resources.constants.DOWNLOAD.key)
+    });
+    menu.append(download);
+  } else {
+    let download = _createElementWithText('div', Resources.constants.DOWNLOAD_FOLDER.text);
+    download.classList.add('menu-item');
+    download.addEventListener('click', e => {
+      e.stopPropagation();
+      callback(obj, Resources.constants.DOWNLOAD_FOLDER.key)
+    });
+    menu.append(download);
+  }
+
+  let folder = _createElementWithText('div', Resources.constants.NEW_FOLDER.text);
+  folder.classList.add('menu-item');
+  folder.addEventListener('click', e => {
+    e.stopPropagation();
+    callback(obj, Resources.constants.NEW_FOLDER.val)
+  });
+  menu.append(folder);
+
+  if (obj.isFile) {
+    let del = _createElementWithText('div', Resources.constants.DELETE.text);
+    del.classList.add('menu-item');
+    del.addEventListener('click', e => {
+      e.stopPropagation();
+      callback(obj, Resources.constants.DELETE.val)
+    });
+    menu.append(del);
+  }
+
+  return menu;
+}
 export {
   getTemplate,
   showFileList,
