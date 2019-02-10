@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const sizeOf = require('image-size');
 const request = require('request');
+const archiver = require('archiver');
 const {
   exec
 } = require('child_process');
@@ -12,12 +13,16 @@ const {
 const httpServer = http.createServer(app);
 
 let basePath;
+let tempPath;
+
 if (process.env.NODE_ENV === 'production') {
   app.use('/', express.static(path.join(__dirname, '../public/build/default')));
   basePath = '/media/pi';
+  tempPath = '/media/pi/PartA/temp';
 } else {
   app.use('/', express.static(path.join(__dirname, '../public/build/dev')));
   basePath = '/home/saii';
+  tempPath = '/home/saii/temp';
 }
 
 app.use(express.json());
@@ -182,7 +187,49 @@ app.get('/create/*', function(req, res) {
 
 app.get('/download/*', (req, res) => {
   let filePath = basePath + decodeURI(req.url.substring(9));
-  res.download(filePath);
+  const pathStat = fs.lstatSync(filePath);
+
+  if (pathStat.isSymbolicLink()) {
+    res.send('Not yet supported');
+  } else if (pathStat.isFile()) {
+    res.download(filePath);
+  } else {
+    let folderName = filePath.split('/').pop();
+    let tempFilePath = `${tempPath}/${folderName}.tar.gz`
+    let output = fs.createWriteStream(tempFilePath);
+    let archive = archiver('tar', {
+      gzip: true,
+      gzipOptions: {
+        level: 9
+      }
+    });
+
+    output.on('close', function() {
+      console.log(archive.pointer() + ' total bytes');
+      res.download(tempFilePath, (err) => {
+        if (err) {
+          console.error(err);
+        }
+        fs.unlink(tempFilePath, (err) => {
+          if (err) {
+            console.error(err);
+          }
+        })
+      });
+    });
+
+    archive.on('warning', function(err) {
+      console.log(err);
+    });
+
+    // good practice to catch this error explicitly
+    archive.on('error', function(err) {
+      console.error(err);
+    });
+    archive.pipe(output);
+    archive.directory(filePath, folderName);
+    archive.finalize();
+  }
 })
 
 app.get('/explore', function(req, res) {

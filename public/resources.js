@@ -64,7 +64,7 @@ let Resources = (function() {
         key: 'download'
       },
       DOWNLOAD_FOLDER: {
-        text: 'Download as Zip',
+        text: 'Compress and Download',
         key: 'download_as_zip'
       },
       NEW_FOLDER: {
