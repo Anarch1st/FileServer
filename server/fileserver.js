@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(express.json());
 
-app.post('/upload', function(req, res) {
+app.post('/upload', function (req, res) {
   for (var file of req.body.files) {
     var actualPath = basePath;
     if (req.body.path) {
@@ -43,7 +43,7 @@ app.post('/upload', function(req, res) {
   res.end();
 });
 
-app.get('/video/*', function(req, res) {
+app.get('/video/*', function (req, res) {
   let filePath = basePath + decodeURI(req.url.substring(6));
 
   var stat;
@@ -85,10 +85,10 @@ app.get('/video/*', function(req, res) {
   }
 });
 
-app.get('/getFile/*', function(req, res) {
+app.get('/getFile/*', function (req, res) {
   let filePath = basePath + decodeURI(req.url.substring(8));
 
-  exec('file -b -i ' + filePath, function(err, stdout, stderr) {
+  exec('file -b -i ' + filePath, function (err, stdout, stderr) {
     const parts = stdout.split(';');
     // res.setHeader('Content-Type', parts[0]);
     res.sendFile(filePath, (err) => {
@@ -101,7 +101,7 @@ app.get('/getFile/*', function(req, res) {
 
 });
 
-app.get('/get/*', function(req, res) {
+app.get('/get/*', function (req, res) {
   let filePath = basePath + decodeURI(req.url.substring(4));
   const pathStat = fs.lstatSync(filePath);
 
@@ -115,7 +115,7 @@ app.get('/get/*', function(req, res) {
       if (err) {
         res.send('Insufficient Read permission');
       } else {
-        exec('file -b -i "' + filePath + '"', function(err, stdout, stderr) {
+        exec('file -b -i "' + filePath + '"', function (err, stdout, stderr) {
           const parts = stdout.split(';');
           console.log(parts);
           var sendObj = {
@@ -136,7 +136,7 @@ app.get('/get/*', function(req, res) {
       }
     });
   } else {
-    fs.readdir(filePath, function(err, files) {
+    fs.readdir(filePath, function (err, files) {
       if (err) {
         delete err.path;
         res.send(err);
@@ -173,7 +173,7 @@ app.get('/get/*', function(req, res) {
   }
 });
 
-app.get('/create/*', function(req, res) {
+app.get('/create/*', function (req, res) {
   let filePath = basePath + decodeURI(req.url.substring(4));
 
   fs.mkdir(filePath, (err) => {
@@ -195,7 +195,7 @@ app.get('/download/*', (req, res) => {
     res.download(filePath);
   } else {
     let folderName = filePath.split('/').pop();
-    let tempFilePath = `${tempPath}/${folderName}.tar.gz`
+    let tempFilePath = `${tempPath}/${folderName}.tar.gzip`
     let output = fs.createWriteStream(tempFilePath);
     let archive = archiver('tar', {
       gzip: true,
@@ -204,7 +204,7 @@ app.get('/download/*', (req, res) => {
       }
     });
 
-    output.on('close', function() {
+    output.on('close', function () {
       console.log(archive.pointer() + ' total bytes');
       res.download(tempFilePath, (err) => {
         if (err) {
@@ -218,12 +218,12 @@ app.get('/download/*', (req, res) => {
       });
     });
 
-    archive.on('warning', function(err) {
+    archive.on('warning', function (err) {
       console.log(err);
     });
 
     // good practice to catch this error explicitly
-    archive.on('error', function(err) {
+    archive.on('error', function (err) {
       console.error(err);
     });
     archive.pipe(output);
@@ -232,7 +232,7 @@ app.get('/download/*', (req, res) => {
   }
 })
 
-app.get('/explore', function(req, res) {
+app.get('/', function (req, res) {
   if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.join(__dirname, '../public/build/default/explore.html'));
   } else {
@@ -240,25 +240,6 @@ app.get('/explore', function(req, res) {
   }
 });
 
-function registerSelf() {
-  const postData = {
-    path: 'files',
-    ip: 'http://localhost:8030',
-    name: 'files'
-  }
-  request.post('http://localhost:8000/register', {
-    form: postData
-  }, function(err, res, body) {
-    if (res && res.statusCode && (res.statusCode === 200 || res.statusCode === 204)) {
-      console.log("Successfully registered");
-    } else {
-      console.log("Will retry");
-      setTimeout(registerSelf, 2000);
-    }
-  });
-}
-
-httpServer.listen(process.env.PORT || 8030, function() {
-  if (process.env.NODE_ENV === 'production') registerSelf();
+httpServer.listen(process.env.PORT || 8030, function () {
   console.log("Server started on port: " + httpServer.address().port);
 });

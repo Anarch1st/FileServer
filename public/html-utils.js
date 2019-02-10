@@ -25,6 +25,7 @@ function getTemplate() {
     .list {
       width: 100%;
       table-layout: fixed;
+      border-spacing: 0px;
     }
     .list tr:nth-child(odd) {
       background: #EEEEEE;
@@ -33,12 +34,13 @@ function getTemplate() {
       background: white;
     }
     .list tr:hover {
-      color: #FCF8DE;
-      background-color: #00303C;
+      color: #212121;
+      background-color: #4FC3F7;
     }
     .list th {
-      color: white;
-      background-color: black;
+      color: #FFF59D;
+      background-color: #1976D2;
+      font-size: 140%;
     }
     .list td {
       overflow: hidden;
@@ -78,7 +80,7 @@ function getTemplate() {
       width: 100%;
     }
     .menu {
-      width: 150px;
+      width: 200px;
       box-shadow: 3px 3px 5px #888888;
       border-style: solid;
       border-width: 1px;
@@ -109,6 +111,10 @@ function getTemplate() {
   <div id="body">
   <app-location route="{{route}}" use-hash-as-path></app-location>
 
+  <div id='outerDiv'></div>
+
+  <div id="seperator"></div>
+
   <div id="header">
     <form id="uploadForm" action="/files/upload" method="post" enctype="multipart/form-data">
       <input id="uploadPath" type="hidden" name="path">
@@ -116,10 +122,6 @@ function getTemplate() {
       <input type="submit" value="Upload">
     </form>
   </div>
-
-  <div id="seperator"></div>
-
-  <div id='outerDiv'></div>
 
   <iron-ajax id="file"
       on-response="handleFile"
