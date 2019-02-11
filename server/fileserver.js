@@ -6,6 +6,7 @@ const fs = require('fs');
 const sizeOf = require('image-size');
 const request = require('request');
 const archiver = require('archiver');
+const multer = require('multer');
 const {
   exec
 } = require('child_process');
@@ -27,19 +28,21 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(express.json());
 
-app.post('/upload', function (req, res) {
-  for (var file of req.body.files) {
-    var actualPath = basePath;
-    if (req.body.path) {
-      actualPath = actualPath + req.body.path;
-    }
-    actualPath = actualPath + '/' + file.originalname;
-    fs.rename(file.path, actualPath, (err) => {
-      if (err) {
-        console.error(err);
-      }
-    });
+let storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, req.body.path)
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
   }
+});
+
+let upload = multer({
+  storage: storage
+});
+
+app.post('/upload', upload.array('files'), function (req, res) {
+  res.send(req.files);
   res.end();
 });
 
