@@ -166,7 +166,7 @@ app.get('/get/*', function (req, res) {
 
         let promiseArray = files
           // Add only if not hidden file or has valid user header
-          .filter(file => (req.headers.user || file.substring(0, 1) !== '.'))
+          .filter(file => ((req.headers.user && req.headers.user !== 'false') || file.substring(0, 1) !== '.'))
           .map(async (file) => {
             let stat = await lstat(filePath + '/' + file);
             return {
