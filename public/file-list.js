@@ -88,7 +88,8 @@ export class FileList extends PolymerElement {
     HTML.showFileList(this.$.outerDiv, this.fileList, function(obj, action) {
       if (action === this._resources.constants.CLICK.key) {
         this.set('selectedFile', obj)
-      } else if (action === this._resources.constants.DOWNLOAD.key) {
+      } else if (action === this._resources.constants.DOWNLOAD.key ||
+        action === this._resources.constants.DOWNLOAD_FOLDER.key) {
         let downloader = this.$.fileDownload;
         downloader.href = this._resources.urls.GET_FILE_DOWNLOAD_URL + this.route.path + '/' + encodeURI(obj.name);
         downloader.download = obj.name;
